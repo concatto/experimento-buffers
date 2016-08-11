@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Program {
+	/**
+	 * Cria 8 arquivos de teste, iniciando com tamanho de 64kB
+	 * e dobrando a cada novo arquivo. 
+	 */
 	private void createFiles() {
 		try {
 			for (int i = 0; i < 8; i++) {
@@ -24,8 +28,26 @@ public class Program {
 		}
 	}
 	
-	public Program() {
+	private long runExperiment(FileCopier copier, File from, File to) throws IOException {
+		long time = System.currentTimeMillis();
+	
+		copier.copy(from, to);
 		
+		return System.currentTimeMillis() - time;
+	}
+	
+	public Program() {
+		File origin = new File("2.test");
+		File target = new File("target2.test");
+		
+		try {
+			target.createNewFile();
+			
+			System.out.println(runExperiment(new StandardFileCopier(), origin, target));
+			System.out.println(runExperiment(new BufferedFileCopier(8192), origin, target));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
