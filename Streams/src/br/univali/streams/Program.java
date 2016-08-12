@@ -1,23 +1,27 @@
 package br.univali.streams;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class Program {
+	private static final int[] sizes = {64, 128, 256, 512, 1024, 2048, 4096, 8192};
+	
 	/**
 	 * Cria 8 arquivos de teste, iniciando com tamanho de 64kB
 	 * e dobrando a cada novo arquivo. 
 	 */
 	private void createFiles() {
 		try {
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < sizes.length; i++) {
 				File f = new File((i + 1) + ".test");
 				f.createNewFile();
 				
 				FileOutputStream writer = new FileOutputStream(f);
 
-				for (int j = 0; j < Math.pow(2, 6 + i) * 1024; j++) {
+				for (int j = 0; j < sizes[i] * 1024; j++) {
 					writer.write((int) (Math.random() * 255));
 				}
 				
@@ -37,14 +41,29 @@ public class Program {
 	}
 	
 	public Program() {
-		File origin = new File("2.test");
-		File target = new File("target2.test");
-		
 		try {
-			target.createNewFile();
+			File results = new File("results.csv");
+			results.createNewFile();
+			BufferedWriter writer = Files.newBufferedWriter(results.toPath());
+			writer.write("fileSize,single,buffer1k,buffer8k,buffer32k\n");
 			
-			System.out.println(runExperiment(new StandardFileCopier(), origin, target));
-			System.out.println(runExperiment(new BufferedFileCopier(8192), origin, target));
+			for (int k = 0; k < 50; k++) {
+				for (int i = 0; i < sizes.length; i++) {
+					File origin = new File((i + 1) + ".test");
+					File target = new File("target" + (i + 1) + ".test");
+					target.createNewFile();
+					
+					long single = runExperiment(new StandardFileCopier(), origin, target);
+					long buffer1 = runExperiment(new BufferedFileCopier(1024), origin, target);
+					long buffer8 = runExperiment(new BufferedFileCopier(8192), origin, target);
+					long buffer32 = runExperiment(new BufferedFileCopier(32768), origin, target);
+					
+					writer.write(String.format("%d,%d,%d,%d,%d\n", sizes[i], single, buffer1, buffer8, buffer32));
+					writer.flush();
+				}
+			}
+			
+			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
