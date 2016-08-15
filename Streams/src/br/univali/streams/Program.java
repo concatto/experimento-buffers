@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class Program {
-	private static final int[] sizes = {64, 128, 256, 512, 1024, 2048, 4096, 8192};
+	private static final int[] sizes = {64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768};
 	
 	/**
 	 * Cria 8 arquivos de teste, iniciando com tamanho de 64kB
@@ -42,6 +42,8 @@ public class Program {
 	
 	public Program() {
 		try {
+			createFiles();
+			
 			File results = new File("results.csv");
 			results.createNewFile();
 			BufferedWriter writer = Files.newBufferedWriter(results.toPath());
