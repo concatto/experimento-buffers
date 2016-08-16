@@ -44,7 +44,7 @@ public class Program {
 		try {
 			createFiles();
 			
-			File results = new File("results.csv");
+			File results = new File("results2.csv");
 			results.createNewFile();
 			BufferedWriter writer = Files.newBufferedWriter(results.toPath());
 			writer.write("fileSize,single,buffer1k,buffer8k,buffer32k\n");

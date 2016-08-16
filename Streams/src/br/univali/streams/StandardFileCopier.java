@@ -17,7 +17,7 @@ public class StandardFileCopier implements FileCopier {
 		int value;
 		do {
 			value = in.read();
-			out.write(value);
+			if (value != -1) out.write(value);
 		} while (value != -1);
 		
 		in.close();

@@ -22,15 +22,11 @@ public class BufferedFileCopier implements FileCopier {
 		InputStream in = new BufferedInputStream(new FileInputStream(from), bufferSize);
 		OutputStream out = new BufferedOutputStream(new FileOutputStream(to), bufferSize);
 		
-		byte[] buffer = new byte[bufferSize];
-		int bytesRead;
-		
+		int value;
 		do {
-			bytesRead = in.read(buffer, 0, bufferSize); //Leitura
-			if (bytesRead > 0) {
-				out.write(buffer, 0, bytesRead); //Escrita
-			}
-		} while (bytesRead != -1);
+			value = in.read();
+			if (value != -1) out.write(value);
+		} while (value != -1);
 		
 		in.close();
 		out.close();
