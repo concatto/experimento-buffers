@@ -1,9 +1,14 @@
 package br.univali.streams;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 
 public class Program {
@@ -32,17 +37,36 @@ public class Program {
 		}
 	}
 	
-	private long runExperiment(FileCopier copier, File from, File to) throws IOException {
+	private long copy(InputStream in, OutputStream out) throws IOException {
 		long time = System.currentTimeMillis();
-	
-		copier.copy(from, to);
+		
+		int value;
+		do {
+			value = in.read();
+			if (value != -1) out.write(value);
+		} while (value != -1);
+		
+		in.close();
+		out.close();
 		
 		return System.currentTimeMillis() - time;
 	}
 	
+	private long runStandardExperiment(File from, File to) throws IOException {
+		InputStream in = new FileInputStream(from);
+		OutputStream out = new FileOutputStream(to);
+		return copy(in, out);
+	}
+	
+	private long runBufferedExperiment(File from, File to, int bufferSize) throws IOException {
+		InputStream in = new BufferedInputStream(new FileInputStream(from), bufferSize);
+		OutputStream out = new BufferedOutputStream(new FileOutputStream(to), bufferSize);
+		return copy(in, out);
+	}
+	
 	public Program() {
 		try {
-			createFiles();
+			//createFiles();
 			
 			File results = new File("results2.csv");
 			results.createNewFile();
@@ -55,10 +79,10 @@ public class Program {
 					File target = new File("target" + (i + 1) + ".test");
 					target.createNewFile();
 					
-					long single = runExperiment(new StandardFileCopier(), origin, target);
-					long buffer1 = runExperiment(new BufferedFileCopier(1024), origin, target);
-					long buffer8 = runExperiment(new BufferedFileCopier(8192), origin, target);
-					long buffer32 = runExperiment(new BufferedFileCopier(32768), origin, target);
+					long single = runStandardExperiment(origin, target);
+					long buffer1 = runBufferedExperiment(origin, target, 1024);
+					long buffer8 = runBufferedExperiment(origin, target, 8192);
+					long buffer32 = runBufferedExperiment(origin, target, 32768);
 					
 					writer.write(String.format("%d,%d,%d,%d,%d\n", sizes[i], single, buffer1, buffer8, buffer32));
 					writer.flush();
